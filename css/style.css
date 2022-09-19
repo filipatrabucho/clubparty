@@ -1,0 +1,58 @@
+@font-face {
+  font-family: Gotham-Medium;
+  src: url("../fonts/GothamNarrow-Medium.otf");
+}
+
+@font-face {
+  font-family: Gotham-Light;
+  src: url("../fonts/GothamNarrow-Light.otf");
+}
+
+@font-face {
+  font-family: Gotham-Ultra;
+  src: url("../fonts/GothamXNarrow-Ultra.otf");
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+body {
+  background-image: url("../assets/background.png");
+}
+
+a {
+  text-decoration: none;
+  color: #000;
+}
+ul {
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+}
+li {
+  padding: 20px;
+}
+
+h2 {
+  text-transform: uppercase;
+  font-size: 32px;
+  font-family: Gotham-Ultra;
+  color: #fff;
+}
+p,
+a {
+  font-family: Gotham-Medium;
+}
+.section {
+  height: 100vh;
+}
+
+@media only screen and (max-width: 450px) {
+  .main-container {
+    max-width: 350px;
+    margin: auto;
+    padding: 20px;
+  }
+}

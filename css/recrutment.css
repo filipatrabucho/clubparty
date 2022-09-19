@@ -1,0 +1,83 @@
+.res-container {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  align-content: center;
+  max-width: 1200px;
+  margin: auto;
+  margin-top: 180px;
+}
+
+.recruiting-title {
+  text-transform: uppercase;
+  font-size: 100px;
+  font-family: Gotham-Ultra;
+  color: #fff;
+  text-align: right;
+}
+.recruiting-container {
+  display: flex;
+  text-align: center;
+  justify-content: right;
+}
+.recruiting-name {
+  display: flex;
+  flex-direction: row;
+  margin-right: 80px;
+}
+.rust {
+  display: flex;
+  text-align: center;
+  justify-content: right;
+}
+.recruiting-game {
+  width: 100px;
+  height: 100px;
+  margin-right: 20px;
+}
+.recruiting-info h3 {
+  font-family: Gotham-Ultra;
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 24px;
+  margin-right: 20px;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+.recruiting-details {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.status {
+  width: 20px;
+}
+.recruiting-id {
+  color: #d65a7e;
+  font-family: Gotham-Medium;
+  font-size: 15px;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.fortnite {
+  margin-top: 20px;
+  display: flex;
+  justify-content: right;
+}
+@media only screen and (max-width: 450px) {
+  .res-container {
+    margin-top: 50px;
+  }
+  .recruiting-title {
+    font-size: 40px;
+  }
+  .recruiting-container {
+    flex-direction: column;
+  }
+  .recruiting-name {
+    margin-bottom: 40px;
+  }
+}
