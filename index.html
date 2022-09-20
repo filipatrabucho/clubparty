@@ -253,15 +253,16 @@
     </section>
 
     <!-----------------------Support--------------------------->
-    <section id="support">
+    <section id="contact-form">
       <div class="support-container">
         <h2>SUPPORT</h2>
-        <form class="form">
+        <form class="form" action="https://formsubmit.co/3293b33d713946031f6fc19d0478f38e" method="POST" >
+          <input type="hidden" name="contact_number">
           <input name="name" type="text" class="feedback-input name" placeholder="Name" required/>
           <input  name="username" type="text" class="feedback-input username" placeholder="Discord Username" />
           <input  name="email" type="email" class="feedback-input email" placeholder="Email" required />
           <textarea name="message" class="feedback-input message" placeholder="Comment" required></textarea>
-          <input type="submit" id="submit" value="Enviar" />
+          <input id="validate" type="submit" value="Enviar"/>
         </form>
       </div>
     </section>
