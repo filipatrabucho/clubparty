@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/useAuth';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const [roleSearch, setRoleSearch] = useState('');
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [roleManagerFor, setRoleManagerFor] = useState(null);
+  const [actionModal, setActionModal] = useState(null); // { endpoint, discord_id, username }
 
   useEffect(() => {
     loadMembers();
@@ -76,34 +78,34 @@ export default function Dashboard() {
     setSyncing(false);
   }
 
-  async function handleAction(endpoint, discord_id, username) {
-    const reason = prompt(`Motivo para ação sobre ${username}:`);
-    if (reason === null) return;
-
-    let body = { discord_id, reason };
-    if (endpoint === 'timeout-member') {
-      const minutes = prompt('Duração em minutos (máx 40320):', '60');
-      if (!minutes) return;
-      body.duration_minutes = Number(minutes);
-    }
-
-    const res = await fetch(`/.netlify/functions/${endpoint}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-
-    if (res.ok) {
-      if (endpoint !== 'timeout-member') {
-        setMembers(prev => prev.filter(m => m.discord_id !== discord_id));
-      } else {
-        alert(`Castigo aplicado a ${username}`);
-      }
-    } else {
-      alert('Erro ao aplicar ação');
-    }
+  function openActionModal(endpoint, discord_id, username) {
+    setActionModal({ endpoint, discord_id, username });
   }
 
+async function confirmAction({ reason, duration_minutes }) {
+  const { endpoint, discord_id, username } = actionModal;
+
+  let body = { discord_id, reason };
+  if (endpoint === 'timeout-member') {
+    body.duration_minutes = duration_minutes;
+  }
+
+  const res = await fetch(`/.netlify/functions/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (res.ok) {
+    if (endpoint !== 'timeout-member') {
+      setMembers(prev => prev.filter(m => m.discord_id !== discord_id));
+    }
+  } else {
+    alert(`Erro ao aplicar ação sobre ${username}`);
+  }
+
+  setActionModal(null);
+}
   async function handleToggleRole(discord_id, role_id, hasRole) {
     const endpoint = hasRole ? 'remove-role' : 'add-role';
 
@@ -270,13 +272,13 @@ export default function Dashboard() {
                         <button className="button-sm" onClick={() => setRoleManagerFor(roleManagerFor === m.discord_id ? null : m.discord_id)}>
                           🎭 Cargos
                         </button>
-                        <button className="button-sm" onClick={() => handleAction('timeout-member', m.discord_id, m.username)}>
+                        <button className="button-sm" onClick={() => openActionModal('timeout-member', m.discord_id, m.username)}>
                           ⏱ Castigar
                         </button>
-                        <button className="button-sm button-warn" onClick={() => handleAction('kick-member', m.discord_id, m.username)}>
+                        <button className="button-sm button-warn" onClick={() => openActionModal('kick-member', m.discord_id, m.username)}>
                           👢 Kick
                         </button>
-                        <button className="button-sm button-danger" onClick={() => handleAction('ban-member', m.discord_id, m.username)}>
+                        <button className="button-sm button-danger" onClick={() => openActionModal('ban-member', m.discord_id, m.username)}>
                           🔨 Ban
                         </button>
                       </div>
@@ -311,8 +313,31 @@ export default function Dashboard() {
               ))}
             </tbody>
           </table>
+          
         )}
       </div>
+      <ConfirmModal
+        isOpen={!!actionModal}
+        title={
+          actionModal?.endpoint === 'ban-member' ? `Banir ${actionModal?.username}?`
+          : actionModal?.endpoint === 'kick-member' ? `Expulsar ${actionModal?.username}?`
+          : `Castigar ${actionModal?.username}?`
+        }
+        description={
+          actionModal?.endpoint === 'ban-member' ? 'Esta ação remove o membro do servidor permanentemente, até ser desbanido.'
+          : actionModal?.endpoint === 'kick-member' ? 'O membro será removido do servidor, mas pode voltar a entrar com um convite.'
+          : 'O membro fica impedido de enviar mensagens/falar durante o tempo definido.'
+        }
+        confirmLabel={
+          actionModal?.endpoint === 'ban-member' ? 'Banir'
+          : actionModal?.endpoint === 'kick-member' ? 'Expulsar'
+          : 'Castigar'
+        }
+        confirmColor={actionModal?.endpoint === 'timeout-member' ? 'warn' : 'danger'}
+        showDuration={actionModal?.endpoint === 'timeout-member'}
+        onConfirm={confirmAction}
+        onCancel={() => setActionModal(null)}
+      />
     </div>
   );
 }
