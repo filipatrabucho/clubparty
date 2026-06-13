@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import CreatePost from './pages/CreatePost';
 import PostsHistory from './pages/PostsHistory';
 import MemberProfile from './pages/MemberProfile';
+import BannedMembers from './pages/BannedMembers';
 
 export default function App() {
   return (
@@ -50,6 +51,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <MemberProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/bans"
+          element={
+            <ProtectedRoute>
+              <BannedMembers />
             </ProtectedRoute>
           }
         />

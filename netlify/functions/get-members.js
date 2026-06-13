@@ -8,8 +8,7 @@ export default async (req) => {
   const forbidden = requireRole(user);
   if (forbidden) return forbidden;
 
-  // Lê do cache local (mais rápido, evita rate limits do Discord)
-  const { data, error } = await supabase
+  const { data: members, error } = await supabase
     .from('guild_cache')
     .select('*')
     .eq('is_member', true)
@@ -17,5 +16,21 @@ export default async (req) => {
 
   if (error) return new Response(error.message, { status: 500 });
 
-  return Response.json({ members: data });
+  // Busca contagens de avisos ativos
+  const { data: warnings } = await supabase
+    .from('warnings')
+    .select('discord_id')
+    .eq('active', true);
+
+  const warningCounts = {};
+  (warnings || []).forEach(w => {
+    warningCounts[w.discord_id] = (warningCounts[w.discord_id] || 0) + 1;
+  });
+
+  const enriched = members.map(m => ({
+    ...m,
+    active_warnings: warningCounts[m.discord_id] || 0,
+  }));
+
+  return Response.json({ members: enriched });
 };

@@ -1047,3 +1047,20 @@ h1, h2, h3 {
 .modal-actions .button-warn {
   color: #1a1c1e !important;
 }
+.warning-badge {
+  display: inline-block;
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  margin-left: 0.5rem;
+}
+.button-default.button {
+  background-color: var(--accent);
+  color: #fff;
+}
+.button-default.button:hover {
+  background-color: var(--accent-hover);
+}

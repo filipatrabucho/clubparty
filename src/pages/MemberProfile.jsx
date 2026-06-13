@@ -37,6 +37,23 @@ export default function MemberProfile() {
   const { member, logs, warnings } = data;
   const activeWarnings = warnings.filter(w => w.active);
 
+  async function handleResolveWarning(warning_id) {
+    const res = await fetch('/.netlify/functions/resolve-warning', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ warning_id }),
+    });
+
+    if (res.ok) {
+      setData(prev => ({
+        ...prev,
+        warnings: prev.warnings.map(w => w.id === warning_id ? { ...w, active: false } : w),
+      }));
+    } else {
+      alert('Erro ao perdoar aviso');
+    }
+  }
+
   return (
     <div className="dashboard">
       <Link to="/dashboard" className="back-link">← Voltar ao Dashboard</Link>
@@ -71,8 +88,26 @@ export default function MemberProfile() {
         </div>
       </div>
 
-      <h2 className="section-title">Histórico de atividade</h2>
+      {activeWarnings.length > 0 && (
+        <div className="active-warnings-section">
+          <h2 className="section-title">Avisos ativos</h2>
+          {activeWarnings.map(w => (
+            <div key={w.id} className="timeline-item log-warn">
+              <div className="timeline-icon">⚠️</div>
+              <div className="timeline-content">
+                <div className="timeline-header">
+                  <strong>{w.reason}</strong>
+                  <button className="button-sm" onClick={() => handleResolveWarning(w.id)}>
+                    Perdoar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
+      <h2 className="section-title" style={{ marginTop: '1rem' }}>Histórico de atividade</h2>
       {logs.length === 0 ? (
         <p className="table-empty">Sem registos para este membro.</p>
       ) : (

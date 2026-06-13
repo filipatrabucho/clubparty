@@ -82,30 +82,36 @@ export default function Dashboard() {
     setActionModal({ endpoint, discord_id, username });
   }
 
-async function confirmAction({ reason, duration_minutes }) {
-  const { endpoint, discord_id, username } = actionModal;
+  async function confirmAction({ reason, duration_minutes }) {
+    const { endpoint, discord_id, username } = actionModal;
 
-  let body = { discord_id, reason };
-  if (endpoint === 'timeout-member') {
-    body.duration_minutes = duration_minutes;
-  }
-
-  const res = await fetch(`/.netlify/functions/${endpoint}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-
-  if (res.ok) {
-    if (endpoint !== 'timeout-member') {
-      setMembers(prev => prev.filter(m => m.discord_id !== discord_id));
+    let body = { discord_id, reason };
+    if (endpoint === 'timeout-member') {
+      body.duration_minutes = duration_minutes;
     }
-  } else {
-    alert(`Erro ao aplicar ação sobre ${username}`);
+
+    const res = await fetch(`/.netlify/functions/${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (res.ok) {
+      if (endpoint === 'kick-member' || endpoint === 'ban-member') {
+        setMembers(prev => prev.filter(m => m.discord_id !== discord_id));
+      } else if (endpoint === 'warn-member') {
+        const data = await res.json();
+        setMembers(prev => prev.map(m =>
+          m.discord_id === discord_id ? { ...m, active_warnings: data.active_warnings } : m
+        ));
+      }
+    } else {
+      alert(`Erro ao aplicar ação sobre ${username}`);
+    }
+
+    setActionModal(null);
   }
 
-  setActionModal(null);
-}
   async function handleToggleRole(discord_id, role_id, hasRole) {
     const endpoint = hasRole ? 'remove-role' : 'add-role';
 
@@ -149,6 +155,7 @@ async function confirmAction({ reason, duration_minutes }) {
           <button className="button button-outline" onClick={handleSync} disabled={syncing}>
             {syncing ? 'A sincronizar...' : 'Sincronizar membros'}
           </button>
+          <Link to="/dashboard/bans" className="button button-outline">🔨 Banidos</Link>
         </div>
       </div>
 
@@ -259,11 +266,15 @@ async function confirmAction({ reason, duration_minutes }) {
                         : <div className="avatar avatar-placeholder" />}
                     </td>
                     <td>
-
-        <Link to={`/dashboard/member/${m.discord_id}`} className="member-username member-link">
-          {m.username}
-        </Link>               
-             </td>
+                      <Link to={`/dashboard/member/${m.discord_id}`} className="member-username member-link">
+                        {m.username}
+                      </Link>    
+                      {m.active_warnings > 0 && (
+                        <span className="warning-badge" title={`${m.active_warnings} aviso(s) ativo(s)`}>
+                          ⚠️ {m.active_warnings}
+                        </span>
+                      )}           
+                    </td>
                     <td className="text-muted">
                       {m.joined_at ? new Date(m.joined_at).toLocaleDateString('pt-PT') : '-'}
                     </td>
@@ -271,6 +282,9 @@ async function confirmAction({ reason, duration_minutes }) {
                       <div className="actions-cell">
                         <button className="button-sm" onClick={() => setRoleManagerFor(roleManagerFor === m.discord_id ? null : m.discord_id)}>
                           🎭 Cargos
+                        </button>
+                        <button className="button-sm" onClick={() => openActionModal('warn-member', m.discord_id, m.username)}>
+                          ⚠️ Avisar
                         </button>
                         <button className="button-sm" onClick={() => openActionModal('timeout-member', m.discord_id, m.username)}>
                           ⏱ Castigar
@@ -317,27 +331,32 @@ async function confirmAction({ reason, duration_minutes }) {
         )}
       </div>
       <ConfirmModal
-        isOpen={!!actionModal}
-        title={
-          actionModal?.endpoint === 'ban-member' ? `Banir ${actionModal?.username}?`
-          : actionModal?.endpoint === 'kick-member' ? `Expulsar ${actionModal?.username}?`
-          : `Castigar ${actionModal?.username}?`
-        }
-        description={
-          actionModal?.endpoint === 'ban-member' ? 'Esta ação remove o membro do servidor permanentemente, até ser desbanido.'
-          : actionModal?.endpoint === 'kick-member' ? 'O membro será removido do servidor, mas pode voltar a entrar com um convite.'
-          : 'O membro fica impedido de enviar mensagens/falar durante o tempo definido.'
-        }
-        confirmLabel={
-          actionModal?.endpoint === 'ban-member' ? 'Banir'
-          : actionModal?.endpoint === 'kick-member' ? 'Expulsar'
-          : 'Castigar'
-        }
-        confirmColor={actionModal?.endpoint === 'timeout-member' ? 'warn' : 'danger'}
-        showDuration={actionModal?.endpoint === 'timeout-member'}
-        onConfirm={confirmAction}
-        onCancel={() => setActionModal(null)}
-      />
+            isOpen={!!actionModal}
+            title={
+              actionModal?.endpoint === 'ban-member' ? `Banir ${actionModal?.username}?`
+              : actionModal?.endpoint === 'kick-member' ? `Expulsar ${actionModal?.username}?`
+              : actionModal?.endpoint === 'warn-member' ? `Avisar ${actionModal?.username}?`
+              : `Castigar ${actionModal?.username}?`
+            }
+            description={
+              actionModal?.endpoint === 'ban-member' ? 'Esta ação remove o membro do servidor permanentemente, até ser desbanido.'
+              : actionModal?.endpoint === 'kick-member' ? 'O membro será removido do servidor, mas pode voltar a entrar com um convite.'
+              : actionModal?.endpoint === 'warn-member' ? 'O aviso fica registado no histórico do membro.'
+              : 'O membro fica impedido de enviar mensagens/falar durante o tempo definido.'
+            }
+            confirmLabel={
+              actionModal?.endpoint === 'ban-member' ? 'Banir'
+              : actionModal?.endpoint === 'kick-member' ? 'Expulsar'
+              : actionModal?.endpoint === 'warn-member' ? 'Avisar'
+              : 'Castigar'
+            }
+            confirmColor={
+              actionModal?.endpoint === 'timeout-member' || actionModal?.endpoint === 'warn-member' ? 'warn' : 'danger'
+            }
+            showDuration={actionModal?.endpoint === 'timeout-member'}
+            onConfirm={confirmAction}
+            onCancel={() => setActionModal(null)}
+          />
     </div>
   );
 }
