@@ -18,12 +18,15 @@ export default function Dashboard() {
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [roleManagerFor, setRoleManagerFor] = useState(null);
   const [actionModal, setActionModal] = useState(null); // { endpoint, discord_id, username }
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
     loadMembers();
     loadRoles();
   }, []);
 
+  
   useEffect(() => {
     let result = [...members];
 
@@ -54,6 +57,7 @@ export default function Dashboard() {
     });
 
     setFiltered(result);
+    setCurrentPage(1); // reset ao mudar filtros/ordenação
   }, [members, search, sortBy, sortDir, selectedRole]);
 
   async function loadRoles() {
@@ -141,6 +145,12 @@ export default function Dashboard() {
   }
 
   const sortIcon = (field) => sortBy === field ? (sortDir === 'asc' ? ' ↑' : ' ↓') : '';
+  
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginatedMembers = filtered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   return (
     <div className="dashboard">
@@ -257,7 +267,7 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map(m => (
+              {paginatedMembers.map(m => (
                 <React.Fragment key={m.discord_id}>
                   <tr>
                     <td>
@@ -330,6 +340,30 @@ export default function Dashboard() {
           
         )}
       </div>
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button
+            className="button-sm"
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+          >
+            ← Anterior
+          </button>
+
+          <span className="pagination-info">
+            Página {currentPage} de {totalPages}
+            <span className="text-muted"> ({filtered.length} membros)</span>
+          </span>
+
+          <button
+            className="button-sm"
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Próxima →
+          </button>
+        </div>
+      )}
       <ConfirmModal
             isOpen={!!actionModal}
             title={

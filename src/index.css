@@ -1064,3 +1064,21 @@ h1, h2, h3 {
 .button-default.button:hover {
   background-color: var(--accent-hover);
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.pagination-info {
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.pagination .button-sm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

@@ -70,8 +70,8 @@ if (!tokenRes.ok) {
 
   // 4. Define dashboard_role com base nos roles do Discord
   // (substitui pelos IDs de role reais do teu servidor)
-  const ADMIN_ROLE_ID = 'xxxxxxxxxxxx';
-  const MOD_ROLE_ID = 'yyyyyyyyyyyy';
+  const ADMIN_ROLE_ID = process.env.DISCORD_ADMIN_ROLE_ID;
+  const MOD_ROLE_ID = process.env.DISCORD_MOD_ROLE_ID;
 
   let dashboardRole = 'member';
   if (member.roles.includes(ADMIN_ROLE_ID)) dashboardRole = 'admin';
