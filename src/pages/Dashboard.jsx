@@ -51,6 +51,7 @@ export default function Dashboard() {
           <span className="stat-number">{totals.actionsLast30Days}</span>
           <span className="stat-label">Ações (30 dias)</span>
         </div>
+
       </div>
 
       <div className="charts-grid">

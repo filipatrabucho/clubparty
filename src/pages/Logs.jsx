@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import * as XLSX from 'xlsx';
 
 const ACTION_LABELS = {
   ban: { label: 'Banido', icon: '🔨', className: 'log-ban' },
@@ -56,6 +57,65 @@ export default function Logs() {
     setSearchParams(params);
   }
 
+  const ACTION_NAMES = {
+  ban: 'Ban',
+  unban: 'Unban',
+  kick: 'Kick',
+  timeout: 'Timeout',
+  warn: 'Aviso',
+  role_add: 'Cargo adicionado',
+  role_remove: 'Cargo removido',
+};
+
+function exportToExcel() {
+  if (logs.length === 0) return;
+
+  const rows = logs.map(log => ({
+    'Data': new Date(log.created_at).toLocaleString('pt-PT'),
+    'Ação': ACTION_NAMES[log.action] || log.action,
+    'Membro': log.target_username || '',
+    'Discord ID': log.target_discord_id || '',
+    'Motivo': log.reason || '',
+    'Origem': log.source === 'automod' ? 'Automático' : 'Manual',
+    'Moderador': log.moderator_name || '',
+    'Duração (min)': log.duration_minutes || '',
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+
+  // Larguras de coluna ajustadas
+  worksheet['!cols'] = [
+    { wch: 18 }, // Data
+    { wch: 16 }, // Ação
+    { wch: 20 }, // Membro
+    { wch: 20 }, // Discord ID
+    { wch: 40 }, // Motivo
+    { wch: 12 }, // Origem
+    { wch: 20 }, // Moderador
+    { wch: 14 }, // Duração
+  ];
+
+  // Estilo do cabeçalho (negrito + fundo)
+  const headerRange = XLSX.utils.decode_range(worksheet['!ref']);
+  for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
+    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+    if (!worksheet[cellAddress]) continue;
+    worksheet[cellAddress].s = {
+      font: { bold: true, color: { rgb: 'FFFFFF' } },
+      fill: { fgColor: { rgb: 'D65A7E' } },
+      alignment: { horizontal: 'center' },
+    };
+  }
+
+  const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Logs');
+
+    XLSX.writeFile(workbook, `clubparty-logs-${new Date().toISOString().slice(0, 10)}.xlsx`, {
+      cellStyles: true,
+    });
+  }
+
+
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -63,6 +123,11 @@ export default function Logs() {
           <Link to="/dashboard" className="back-link">← Voltar ao Dashboard</Link>
           <h1>Logs de Moderação</h1>
           <p className="dashboard-welcome">Histórico completo de ações no servidor</p>
+        </div>
+        <div className="dashboard-actions">
+          <button className="button button-outline" onClick={exportToExcel} disabled={logs.length === 0}>
+            📥 Exportar Excel
+          </button>
         </div>
       </div>
 

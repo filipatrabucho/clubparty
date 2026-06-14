@@ -69,7 +69,7 @@ export default function Rules() {
 
         <div className="rules-cta">
           <p>Tens dúvidas sobre alguma regra?</p>
-          <a href="https://discord.gg/o-teu-invite" className="button">Falar com a Staff no Discord</a>
+          <a href="https://discord.gg/QkhJmtQgk3" className="button">Falar com a Staff no Discord</a>
         </div>
       </div>
     </div>

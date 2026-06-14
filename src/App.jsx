@@ -12,6 +12,8 @@ import Staff from './pages/Staff';
 import Analytics from './pages/Analytics';
 import Members from './pages/Members'; 
 import Logs from './pages/Logs';
+import MyProfile from './pages/MyProfile';
+import SyncCenter from './pages/SyncCenter';
 
 export default function App() {
   return (
@@ -65,6 +67,23 @@ export default function App() {
         <Route path="/equipa" element={<Staff />} />
         <Route path="/dashboard/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
 
+        <Route
+          path="/perfil"
+          element={
+            <ProtectedRoute roles={['member', 'mod', 'admin']}>
+              <MyProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/sync"
+          element={
+            <ProtectedRoute>
+              <SyncCenter />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

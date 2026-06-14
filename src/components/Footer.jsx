@@ -8,7 +8,7 @@ export default function Footer() {
       <img src={logo} alt="Club Party" className="footer-logo" />
 
       <div className="footer-socials">
-        <a href="https://discord.gg/o-teu-invite" target="_blank" rel="noopener noreferrer" title="Discord">
+        <a href="https://discord.gg/QkhJmtQgk3" target="_blank" rel="noopener noreferrer" title="Discord">
           <DiscordIcon className="social-icon" />
         </a>
         <a href="https://www.instagram.com/clubpartyserver/" target="_blank" rel="noopener noreferrer" title="Instagram">
@@ -20,7 +20,7 @@ export default function Footer() {
         <a href="mailto:clubpartyserver@gmail.com" title="Email">
           <EmailIcon className="social-icon" />
         </a>
-        <a href="https://clubparty-shop.fourthwall.com/en-eur" target="_blank" rel="noopener noreferrer" title="Loja">
+        <a href="https://a-tua-loja.fourthwall.com" target="_blank" rel="noopener noreferrer" title="Loja">
           <ShopIcon className="social-icon" />
         </a>
         <Link to="/regras" className="footer-text-link">Regras</Link>

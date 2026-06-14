@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/useAuth';
 import logo from '../assets/logo-navbar.svg';
@@ -12,6 +12,19 @@ const discordLoginUrl = `https://discord.com/api/oauth2/authorize?client_id=${DI
 export default function Navbar() {
   const { user, loading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+
+  // Fecha o dropdown ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <nav className="navbar">
@@ -45,15 +58,44 @@ export default function Navbar() {
         </a>
 
         {loading ? null : user ? (
-          <>
-            <span className="navbar-username">Olá, {user.username}</span>
-            {(user.dashboard_role === 'admin' || user.dashboard_role === 'mod') && (
-              <Link to="/dashboard" className="button" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+          <div className="navbar-user" ref={userMenuRef}>
+            <button
+              className="navbar-user-trigger"
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+            >
+              {user.avatar_url
+                ? <img src={user.avatar_url} alt="" className="navbar-user-avatar" />
+                : <div className="navbar-user-avatar navbar-user-avatar-placeholder" />}
+              <span className="navbar-username">Olá, {user.username}</span>
+              <span className="navbar-user-caret">{userMenuOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {userMenuOpen && (
+              <div className="navbar-user-dropdown">
+                <Link
+                  to="/perfil"
+                  className="navbar-dropdown-item"
+                  onClick={() => { setUserMenuOpen(false); setMenuOpen(false); }}
+                >
+                  👤 Meu Perfil
+                </Link>
+                {(user.dashboard_role === 'admin' || user.dashboard_role === 'mod') && (
+                  <Link
+                    to="/dashboard"
+                    className="navbar-dropdown-item"
+                    onClick={() => { setUserMenuOpen(false); setMenuOpen(false); }}
+                  >
+                    🛠️ Dashboard Staff
+                  </Link>
+                )}
+                <a href="/.netlify/functions/auth-logout" className="navbar-dropdown-item navbar-dropdown-item-danger">
+                  🚪 Logout
+                </a>
+              </div>
             )}
-            <a href="/.netlify/functions/auth-logout" className="button button-outline">Logout</a>
-          </>
+          </div>
         ) : (
-          <a href={discordLoginUrl} className="button">Login com Discord</a>
+          <a href={discordLoginUrl} className="button" onClick={() => setMenuOpen(false)}>Login com Discord</a>
         )}
       </div>
     </nav>

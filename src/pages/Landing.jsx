@@ -2,6 +2,7 @@ import logo from '../assets/logo.png';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
+import ShopProducts from '../components/ShopProducts';
 
 const GAMES = [
   { name: 'Among Us', icon: '/games/AMOUNGS.png' },
@@ -52,7 +53,7 @@ export default function Landing() {
           Comunidade, eventos e boa vibe — todos os dias.
         </p>
         <div className="hero-actions">
-          <a href="https://discord.gg/o-teu-invite" className="button">Entrar no Discord</a>
+          <a href="https://discord.gg/QkhJmtQgk3" className="button">Entrar no Discord</a>
           <a href="#sobre" className="button button-outline">Saber mais</a>
         </div>
         <div className="hero-stats">
@@ -86,7 +87,7 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
+      <ShopProducts />
       {/* EVENTOS */}
       <section className="events">
         <h2>Próximos Eventos</h2>
@@ -183,7 +184,7 @@ export default function Landing() {
       <section className="cta">
         <h2>Pronto para entrar?</h2>
         <p>Junta-te a nós agora mesmo. É grátis e demora 10 segundos.</p>
-        <a href="https://discord.gg/o-teu-invite" className="button">Entrar no Discord</a>
+        <a href="https://discord.gg/QkhJmtQgk3" className="button">Entrar no Discord</a>
       </section>
 
       {/* FOOTER */}
