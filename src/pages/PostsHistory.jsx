@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../lib/useAuth';
 
 const STATUS_LABELS = {
   draft: { label: 'Rascunho', className: 'status-draft' },
