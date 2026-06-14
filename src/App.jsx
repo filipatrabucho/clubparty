@@ -14,6 +14,7 @@ import Members from './pages/Members';
 import Logs from './pages/Logs';
 import MyProfile from './pages/MyProfile';
 import SyncCenter from './pages/SyncCenter';
+import EventsManager from './pages/EventsManager';
 
 export default function App() {
   return (
@@ -81,6 +82,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <SyncCenter />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/events"
+          element={
+            <ProtectedRoute roles={['mod', 'admin']}>
+              <EventsManager />
             </ProtectedRoute>
           }
         />

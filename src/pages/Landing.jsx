@@ -26,6 +26,7 @@ const GAMES = [
 export default function Landing() {
   const [stats, setStats] = useState({ online: '...', total: '...' });
   const [recentPosts, setRecentPosts] = useState([]);
+  const [events, setEvents] = useState([]);
 
   useEffect(() => {
     fetch('/.netlify/functions/guild-stats')
@@ -38,6 +39,13 @@ export default function Landing() {
     fetch('/.netlify/functions/get-recent-posts')
       .then(res => res.json())
       .then(data => setRecentPosts(data.posts || []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch('/.netlify/functions/get-events')
+      .then(res => res.json())
+      .then(data => setEvents(data.events || []))
       .catch(() => {});
   }, []);
 
@@ -89,44 +97,29 @@ export default function Landing() {
       </section>
       <ShopProducts />
       {/* EVENTOS */}
-      <section className="events">
-        <h2>Próximos Eventos</h2>
-        <div className="events-grid">
-          <div className="event-card">
-            <div className="event-date">
-              <span className="event-day">21</span>
-              <span className="event-month">Jun</span>
-            </div>
-            <div className="event-info">
-              <h3>🎉 Festa de Verão</h3>
-              <p>Noite especial com música, sorteios e cargo VIP em jogo.</p>
-              <span className="event-time">⏰ Sábado, 22h00</span>
-            </div>
+      {events.length > 0 && (
+        <section className="events">
+          <h2>Próximos Eventos</h2>
+          <div className="events-grid">
+            {events.map(event => {
+              const date = new Date(event.event_date + 'T00:00:00');
+              return (
+                <div key={event.id} className="event-card">
+                  <div className="event-date">
+                    <span className="event-day">{date.getDate().toString().padStart(2, '0')}</span>
+                    <span className="event-month">{date.toLocaleDateString('pt-PT', { month: 'short' })}</span>
+                  </div>
+                  <div className="event-info">
+                    <h3>{event.emoji} {event.title}</h3>
+                    {event.description && <p>{event.description}</p>}
+                    {event.event_time && <span className="event-time">⏰ {event.event_time}</span>}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div className="event-card">
-            <div className="event-date">
-              <span className="event-day">28</span>
-              <span className="event-month">Jun</span>
-            </div>
-            <div className="event-info">
-              <h3>🎮 Torneio Comunitário</h3>
-              <p>Competição entre membros com prémios exclusivos.</p>
-              <span className="event-time">⏰ Sábado, 21h00</span>
-            </div>
-          </div>
-          <div className="event-card">
-            <div className="event-date">
-              <span className="event-day">05</span>
-              <span className="event-month">Jul</span>
-            </div>
-            <div className="event-info">
-              <h3>🎙️ AMA com a Staff</h3>
-              <p>Pergunta-nos qualquer coisa sobre o servidor ao vivo.</p>
-              <span className="event-time">⏰ Sexta, 20h00</span>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* SOBRE NÓS + JOGOS */}
       <section className="about-games" id="sobre-nos">

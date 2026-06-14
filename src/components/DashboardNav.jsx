@@ -6,6 +6,7 @@ export default function DashboardNav() {
   const links = [
     { to: '/dashboard', label: '📊 Estatísticas' },
     { to: '/dashboard/members', label: '👥 Membros' },
+    { to: '/dashboard/events', label: '📅 Eventos' },
     { to: '/dashboard/posts/history', label: '📜 Publicações' },
     { to: '/dashboard/bans', label: '🔨 Banidos' },
     { to: '/dashboard/logs', label: '📋 Logs' },
