@@ -4,8 +4,9 @@ import { getSessionUser, requireRole } from './_utils/auth.js';
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY);
 
 export default async (req) => {
+  
   const user = getSessionUser(req);
-  const forbidden = requireRole(user);
+  const forbidden = requireRole(user, ['mod', 'admin']);
   if (forbidden) return forbidden;
 
   const { discord_id, reason, delete_message_days } = await req.json();

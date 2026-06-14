@@ -13,7 +13,7 @@ export default async (req, context) => {
   }
 
   // 1. Troca o code por access_token
-/*   const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
+  const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -26,27 +26,10 @@ export default async (req, context) => {
   });
 
   if (!tokenRes.ok) {
-    return new Response('Erro ao obter token', { status: 400 });
-  } */
- const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-  body: new URLSearchParams({
-    client_id: process.env.DISCORD_CLIENT_ID,
-    client_secret: process.env.DISCORD_CLIENT_SECRET,
-    grant_type: 'authorization_code',
-    code,
-    redirect_uri: process.env.DISCORD_REDIRECT_URI,
-  }),
-});
-
-if (!tokenRes.ok) {
-  const errBody = await tokenRes.text();
-  console.log('Discord token error:', tokenRes.status, errBody);
-  console.log('redirect_uri usado:', process.env.DISCORD_REDIRECT_URI);
-  console.log('client_id usado:', process.env.DISCORD_CLIENT_ID);
-  return new Response('Erro ao obter token: ' + errBody, { status: 400 });
-}
+    const errBody = await tokenRes.text();
+    console.log('Discord token error:', tokenRes.status, errBody);
+    return new Response('Erro ao obter token: ' + errBody, { status: 400 });
+  }
 
   const { access_token } = await tokenRes.json();
 
@@ -69,13 +52,18 @@ if (!tokenRes.ok) {
   const member = await memberRes.json();
 
   // 4. Define dashboard_role com base nos roles do Discord
-  // (substitui pelos IDs de role reais do teu servidor)
-  const ADMIN_ROLE_ID = process.env.DISCORD_ADMIN_ROLE_ID;
-  const MOD_ROLE_ID = process.env.DISCORD_MOD_ROLE_ID;
+  const ADMIN_ROLE_ID = process.env.DISCORD_ADMIN_ROLE_ID;   // Founder
+  const MOD_ROLE_ID = process.env.DISCORD_MOD_ROLE_ID;       // Moderator
+  const HELPER_ROLE_ID = process.env.DISCORD_HELPER_ROLE_ID; // Helper / Support
 
   let dashboardRole = 'member';
-  if (member.roles.includes(ADMIN_ROLE_ID)) dashboardRole = 'admin';
-  else if (member.roles.includes(MOD_ROLE_ID)) dashboardRole = 'mod';
+  if (member.roles.includes(ADMIN_ROLE_ID)) {
+    dashboardRole = 'admin';
+  } else if (member.roles.includes(MOD_ROLE_ID)) {
+    dashboardRole = 'mod';
+  } else if (member.roles.includes(HELPER_ROLE_ID)) {
+    dashboardRole = 'helper';
+  }
 
   // 5. Guarda/atualiza na Supabase
   const avatarUrl = discordUser.avatar
@@ -88,22 +76,17 @@ if (!tokenRes.ok) {
     global_name: discordUser.global_name,
     avatar_url: avatarUrl,
     discord_roles: member.roles,
+    dashboard_role: dashboardRole,
     last_login: new Date().toISOString(),
   }, { onConflict: 'discord_id' });
 
   // 6. Cria sessão JWT em cookie httpOnly
-  const { data: dbUser } = await supabase
-    .from('users')
-    .select('dashboard_role')
-    .eq('discord_id', discordUser.id)
-    .single();
-
   const sessionToken = jwt.sign(
     {
       discord_id: discordUser.id,
       username: discordUser.username,
       avatar_url: avatarUrl,
-      dashboard_role: dbUser?.dashboard_role || 'member',
+      dashboard_role: dashboardRole,
     },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }

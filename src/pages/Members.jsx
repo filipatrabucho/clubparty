@@ -153,6 +153,9 @@ export default function Members() {
     currentPage * PAGE_SIZE
   );
 
+  const canKick = ['mod', 'admin'].includes(user?.dashboard_role);
+  const canBan = user?.dashboard_role === 'admin';
+
   return (
     <div className="dashboard">
       <DashboardNav />
@@ -287,12 +290,16 @@ export default function Members() {
                         <button className="button-sm" onClick={() => openActionModal('timeout-member', m.discord_id, m.username)}>
                           ⏱ Castigar
                         </button>
-                        <button className="button-sm button-warn" onClick={() => openActionModal('kick-member', m.discord_id, m.username)}>
-                          👢 Kick
-                        </button>
-                        <button className="button-sm button-danger" onClick={() => openActionModal('ban-member', m.discord_id, m.username)}>
-                          🔨 Ban
-                        </button>
+                        {canKick && (
+                          <button className="button-sm button-warn" onClick={() => openActionModal('kick-member', m.discord_id, m.username)}>
+                            👢 Kick
+                          </button>
+                        )}
+                        {canBan && (
+                          <button className="button-sm button-danger" onClick={() => openActionModal('ban-member', m.discord_id, m.username)}>
+                            🔨 Ban
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

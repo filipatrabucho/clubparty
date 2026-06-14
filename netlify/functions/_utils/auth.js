@@ -13,7 +13,7 @@ export function getSessionUser(req) {
   }
 }
 
-export function requireRole(user, roles = ['mod', 'admin']) {
+export function requireRole(user, roles = ['helper', 'mod', 'admin']) {
   if (!user || !roles.includes(user.dashboard_role)) {
     return new Response('Forbidden', { status: 403 });
   }

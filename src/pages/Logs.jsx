@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import * as XLSX from 'xlsx';
+import { useAuth } from '../lib/useAuth';
 
 const ACTION_LABELS = {
   ban: { label: 'Banido', icon: '🔨', className: 'log-ban' },
@@ -115,6 +116,8 @@ function exportToExcel() {
     });
   }
 
+  const { user } = useAuth();
+  const canExport = ['mod', 'admin'].includes(user?.dashboard_role);
 
   return (
     <div className="dashboard">
@@ -125,9 +128,11 @@ function exportToExcel() {
           <p className="dashboard-welcome">Histórico completo de ações no servidor</p>
         </div>
         <div className="dashboard-actions">
-          <button className="button button-outline" onClick={exportToExcel} disabled={logs.length === 0}>
-            📥 Exportar Excel
-          </button>
+          {canExport && (
+            <button className="button button-outline" onClick={exportToExcel} disabled={logs.length === 0}>
+              📥 Exportar Excel
+            </button>
+          )}
         </div>
       </div>
 

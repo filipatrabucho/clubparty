@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../lib/useAuth';
 
-export default function ProtectedRoute({ children, roles = ['mod', 'admin'] }) {
+export default function ProtectedRoute({ children, roles = ['helper', 'mod', 'admin'] }) {
   const { user, loading } = useAuth();
 
   if (loading) return <p>A carregar...</p>;
