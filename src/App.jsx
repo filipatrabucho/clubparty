@@ -7,6 +7,11 @@ import CreatePost from './pages/CreatePost';
 import PostsHistory from './pages/PostsHistory';
 import MemberProfile from './pages/MemberProfile';
 import BannedMembers from './pages/BannedMembers';
+import Rules from './pages/Rules';
+import Staff from './pages/Staff';
+import Analytics from './pages/Analytics';
+import Members from './pages/Members'; 
+import Logs from './pages/Logs';
 
 export default function App() {
   return (
@@ -14,14 +19,8 @@ export default function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/dashboard/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
         <Route
           path="/create-post"
           element={
@@ -62,6 +61,10 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/regras" element={<Rules />} />
+        <Route path="/equipa" element={<Staff />} />
+        <Route path="/dashboard/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
+
       </Routes>
     </BrowserRouter>
   );

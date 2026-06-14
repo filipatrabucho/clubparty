@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../lib/useAuth';
+import { Link } from 'react-router-dom';
 import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import DashboardNav from '../components/DashboardNav';
 
 const COLORS = ['#D65A7E', '#fbbf24', '#60a5fa', '#4ade80', '#f87171', '#a78bfa', '#fb923c'];
 
-export default function Dashboard() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+export default function Analytics() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,19 +25,24 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      <DashboardNav />
-  
-      {/* Cards clicáveis - levam a páginas com mais detalhe */}
+      <div className="dashboard-header">
+        <div>
+          <Link to="/dashboard" className="back-link">← Voltar ao Dashboard</Link>
+          <h1>Estatísticas</h1>
+          <p className="dashboard-welcome">Visão geral da atividade do servidor</p>
+        </div>
+      </div>
+
       <div className="dashboard-stats">
-        <div className="dashboard-stat-card stat-card-clickable" onClick={() => navigate('/dashboard/members')}>
+        <div className="dashboard-stat-card">
           <span className="stat-number">{totals.totalMembers}</span>
           <span className="stat-label">Membros atuais</span>
         </div>
-        <div className="dashboard-stat-card stat-card-clickable" onClick={() => navigate('/dashboard/bans')}>
+        <div className="dashboard-stat-card">
           <span className="stat-number">{totals.totalBans}</span>
           <span className="stat-label">Bans (total)</span>
         </div>
-        <div className="dashboard-stat-card stat-card-clickable" onClick={() => navigate('/dashboard/logs?action=warn')}>
+        <div className="dashboard-stat-card">
           <span className="stat-number" style={{ color: totals.activeWarnings > 0 ? '#fbbf24' : undefined }}>
             {totals.activeWarnings}
           </span>
@@ -66,12 +67,12 @@ export default function Dashboard() {
                 contentStyle={{ background: '#1a1c1e', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px' }}
                 labelStyle={{ color: '#f5f5f5' }}
               />
-              <Line type="monotone" dataKey="novos" stroke="#D65A7E" strokeWidth={2} dot={{ fill: '#D65A7E', cursor: 'pointer' }} />
+              <Line type="monotone" dataKey="novos" stroke="#D65A7E" strokeWidth={2} dot={{ fill: '#D65A7E' }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Ações de moderação por tipo - clicável -> histórico filtrado */}
+        {/* Ações de moderação por tipo */}
         <div className="chart-card">
           <h2 className="section-title">Ações de Moderação (30 dias)</h2>
           {actionsData.length === 0 ? (
@@ -86,13 +87,7 @@ export default function Dashboard() {
                   contentStyle={{ background: '#1a1c1e', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px' }}
                   labelStyle={{ color: '#f5f5f5' }}
                 />
-                <Bar
-                  dataKey="value"
-                  fill="#D65A7E"
-                  radius={[0, 4, 4, 0]}
-                  cursor="pointer"
-                  onClick={(data) => navigate(`/dashboard/logs?action=${data.actionKey}`)}
-                />
+                <Bar dataKey="value" fill="#D65A7E" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -114,8 +109,6 @@ export default function Dashboard() {
                   cy="50%"
                   outerRadius={90}
                   label={({ name, value }) => `${name}: ${value}`}
-                  onClick={(data) => navigate(`/dashboard/logs?source=${data.name === 'Manual' ? 'manual' : 'automod'}`)}
-                  cursor="pointer"
                 >
                   {sourceData.map((entry, index) => (
                     <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
