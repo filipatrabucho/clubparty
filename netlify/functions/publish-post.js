@@ -5,7 +5,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SEC
 
 export default async (req) => {
   const user = getSessionUser(req);
-  const forbidden = requireRole(user); // mod ou admin
+  const forbidden = requireRole(user, ['mod', 'admin']);
   if (forbidden) return forbidden;
 
   const { title, content, image_url, target_channel_id } = await req.json();

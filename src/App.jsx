@@ -26,7 +26,7 @@ export default function App() {
         <Route
           path="/create-post"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute roles={['mod', 'admin']}>
               <CreatePost />
             </ProtectedRoute>
           }

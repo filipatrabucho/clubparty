@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ConfirmModal from '../components/ConfirmModal';
+import { useAuth } from '../lib/useAuth';
 
 export default function BannedMembers() {
   const [bans, setBans] = useState([]);
@@ -34,7 +35,9 @@ export default function BannedMembers() {
 
     setActionModal(null);
   }
-
+  const { user } = useAuth();
+  const canUnban = ['mod', 'admin'].includes(user?.dashboard_role);
+  
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -83,12 +86,14 @@ export default function BannedMembers() {
                   <td className="text-muted">{b.reason || '—'}</td>
                   <td>
                     <div className="actions-cell">
-                      <button
+                      {canUnban && (                                          
+                        <button
                         className="button-sm"
                         onClick={() => setActionModal({ discord_id: b.discord_id, username: b.username })}
-                      >
-                        🔓 Desbanir
+                        >
+                          🔓 Desbanir
                       </button>
+                      )}
                     </div>
                   </td>
                 </tr>

@@ -12,6 +12,9 @@ export default function PostsHistory() {
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const { user } = useAuth();
+  const canManagePosts = ['mod', 'admin'].includes(user?.dashboard_role);
+  
   useEffect(() => {
     loadPosts();
     fetch('/.netlify/functions/get-channels')
@@ -65,7 +68,9 @@ export default function PostsHistory() {
           <p className="dashboard-welcome">Todas as publicações criadas a partir do site</p>
         </div>
         <div className="dashboard-actions">
-          <Link to="/dashboard/posts" className="button">+ Nova publicação</Link>
+          {canManagePosts && (
+            <Link to="/dashboard/posts" className="button">+ Nova publicação</Link>
+          )}
         </div>
       </div>
 
@@ -133,9 +138,11 @@ export default function PostsHistory() {
                         🔗 Ver
                     </a>
                     )}
-                      <button className="button-sm button-danger" onClick={() => handleDelete(post)}>
-                        🗑 Apagar
-                      </button>
+                      {canManagePosts && (
+                        <button className="button-sm button-danger" onClick={() => handleDelete(post.id)}>
+                          🗑️ Apagar
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

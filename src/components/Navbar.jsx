@@ -79,7 +79,7 @@ export default function Navbar() {
                 >
                   👤 Meu Perfil
                 </Link>
-                {(user.dashboard_role === 'admin' || user.dashboard_role === 'mod') && (
+                {(user.dashboard_role === 'admin' || user.dashboard_role === 'mod' || user.dashboard_role === 'helper') && (
                   <Link
                     to="/dashboard"
                     className="navbar-dropdown-item"
