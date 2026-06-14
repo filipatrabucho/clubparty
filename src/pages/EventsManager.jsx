@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import DashboardNav from '../components/DashboardNav';
 
 const EMOJI_OPTIONS = ['🎉', '🎮', '🎙️', '🏆', '🎵', '🎬', '🎲', '🎂'];
@@ -8,8 +7,12 @@ export default function EventsManager() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: '', description: '', emoji: '🎉', event_date: '', event_time: '' });
+  const [form, setForm] = useState({
+    title: '', description: '', emoji: '🎉', event_date: '', event_time: '',
+    publish_to_discord: true,
+  });
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     loadEvents();
@@ -23,22 +26,30 @@ export default function EventsManager() {
     setLoading(false);
   }
 
+  function resetForm() {
+    setForm({ title: '', description: '', emoji: '🎉', event_date: '', event_time: '', publish_to_discord: true });
+    setEditingId(null);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
 
-    const res = await fetch('/.netlify/functions/create-event', {
+    const endpoint = editingId ? 'update-event' : 'create-event';
+    const body = editingId ? { ...form, id: editingId } : form;
+
+    const res = await fetch(`/.netlify/functions/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify(body),
     });
 
     if (res.ok) {
-      setForm({ title: '', description: '', emoji: '🎉', event_date: '', event_time: '' });
+      resetForm();
       setShowForm(false);
       await loadEvents();
     } else {
-      alert('Erro ao criar evento');
+      alert(editingId ? 'Erro ao atualizar evento' : 'Erro ao criar evento');
     }
     setSubmitting(false);
   }
@@ -54,6 +65,19 @@ export default function EventsManager() {
 
     if (res.ok) setEvents(prev => prev.filter(e => e.id !== id));
     else alert('Erro ao apagar evento');
+  }
+
+  function handleEdit(event) {
+    setForm({
+      title: event.title,
+      description: event.description || '',
+      emoji: event.emoji || '🎉',
+      event_date: event.event_date,
+      event_time: event.event_time || '',
+      publish_to_discord: false, // não republica por defeito ao editar
+    });
+    setEditingId(event.id);
+    setShowForm(true);
   }
 
   function formatDate(dateStr) {
@@ -74,7 +98,10 @@ export default function EventsManager() {
           <p className="dashboard-welcome">Gere os próximos eventos mostrados na página inicial</p>
         </div>
         <div className="dashboard-actions">
-          <button className="button" onClick={() => setShowForm(!showForm)}>
+          <button className="button" onClick={() => {
+            if (showForm) resetForm();
+            setShowForm(!showForm);
+          }}>
             {showForm ? '✕ Cancelar' : '+ Novo Evento'}
           </button>
         </div>
@@ -82,6 +109,8 @@ export default function EventsManager() {
 
       {showForm && (
         <form className="chart-card" style={{ marginBottom: '2rem' }} onSubmit={handleSubmit}>
+          <h3 style={{ marginBottom: '1rem' }}>{editingId ? '✏️ Editar Evento' : '+ Novo Evento'}</h3>
+
           <div className="form-row">
             <div className="form-group">
               <label>Emoji</label>
@@ -142,8 +171,21 @@ export default function EventsManager() {
             </div>
           </div>
 
+          {!editingId && (
+            <div className="form-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={form.publish_to_discord}
+                  onChange={e => setForm(f => ({ ...f, publish_to_discord: e.target.checked }))}
+                />
+                {' '}Publicar também no Discord (canal de eventos)
+              </label>
+            </div>
+          )}
+
           <button className="button" type="submit" disabled={submitting}>
-            {submitting ? 'A criar...' : 'Criar Evento'}
+            {submitting ? 'A guardar...' : editingId ? 'Guardar Alterações' : 'Criar Evento'}
           </button>
         </form>
       )}
@@ -169,6 +211,13 @@ export default function EventsManager() {
                     {event.event_time && <span className="text-muted">⏰ {event.event_time}</span>}
                     {isPast && <span className="status-badge status-failed">Já passou</span>}
                   </div>
+                  <button
+                    className="button-sm"
+                    style={{ marginTop: '0.6rem', marginRight: '0.5rem' }}
+                    onClick={() => handleEdit(event)}
+                  >
+                    ✏️ Editar
+                  </button>
                   <button
                     className="button-sm button-danger"
                     style={{ marginTop: '0.6rem' }}
