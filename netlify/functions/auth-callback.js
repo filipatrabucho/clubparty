@@ -100,11 +100,15 @@ export default async (req, context) => {
     maxAge: 60 * 60 * 24 * 7, // 7 dias
   });
 
+  // 7. Redireciona com base no nível de acesso
+  const STAFF_ROLES = ['helper', 'mod', 'admin'];
+  const redirectTo = STAFF_ROLES.includes(dashboardRole) ? '/dashboard' : '/perfil';
+
   return new Response(null, {
     status: 302,
     headers: {
       'Set-Cookie': sessionCookie,
-      Location: '/dashboard',
+      Location: redirectTo,
     },
   });
 };
