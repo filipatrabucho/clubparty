@@ -15,6 +15,8 @@ import Logs from './pages/Logs';
 import MyProfile from './pages/MyProfile';
 import SyncCenter from './pages/SyncCenter';
 import EventsManager from './pages/EventsManager';
+import MyTickets from './pages/MyTickets';
+import StaffTickets from './pages/StaffTickets';
 
 export default function App() {
   return (
@@ -93,6 +95,23 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/perfil/tickets"
+          element={
+            <ProtectedRoute roles={['member', 'helper', 'mod', 'admin']}>
+              <MyTickets />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/tickets"
+          element={
+            <ProtectedRoute>
+              <StaffTickets />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );

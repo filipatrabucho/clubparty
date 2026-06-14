@@ -142,6 +142,10 @@ export default function MyProfile() {
           <span className="quick-link-icon">👥</span>
           <span>A nossa equipa</span>
         </Link>
+        <Link to="/perfil/tickets" className="quick-link-card">
+          <span className="quick-link-icon">🎫</span>
+          <span>Os meus tickets</span>
+        </Link>
       </div>
 
       {/* HISTÓRICO PESSOAL */}

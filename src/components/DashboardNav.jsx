@@ -10,6 +10,7 @@ export default function DashboardNav() {
     { to: '/dashboard/posts/history', label: '📜 Publicações' },
     { to: '/dashboard/bans', label: '🔨 Banidos' },
     { to: '/dashboard/logs', label: '📋 Logs' },
+    { to: '/dashboard/tickets', label: '🎫 Tickets' },
     { to: '/dashboard/sync', label: '🔄 Sincronizar' },
   ];
 
