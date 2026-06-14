@@ -17,12 +17,14 @@ export default function Footer() {
         <a href="https://www.facebook.com/clubparty" target="_blank" rel="noopener noreferrer" title="Facebook">
           <FacebookIcon className="social-icon" />
         </a>
-        <a href="mailto:clubpartyserver@gmail.com" title="Email">
+        {/* <a href="mailto:clubpartyserver@gmail.com" title="Email">
           <EmailIcon className="social-icon" />
-        </a>
-        <a href="https://a-tua-loja.fourthwall.com" target="_blank" rel="noopener noreferrer" title="Loja">
+        </a> */}
+
+        <a href="https://clubparty-shop.fourthwall.com/en-eur" target="_blank" rel="noopener noreferrer" title="Loja">
           <ShopIcon className="social-icon" />
         </a>
+        <Link to="/suporte" className="footer-text-link">Suporte</Link>
         <Link to="/regras" className="footer-text-link">Regras</Link>
         <Link to="/equipa" className="footer-text-link">Equipa</Link>
       </div>

@@ -17,6 +17,7 @@ import SyncCenter from './pages/SyncCenter';
 import EventsManager from './pages/EventsManager';
 import MyTickets from './pages/MyTickets';
 import StaffTickets from './pages/StaffTickets';
+import Support from './pages/Support';
 
 export default function App() {
   return (
@@ -111,6 +112,8 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/suporte" element={<Support />} />
+
 
       </Routes>
     </BrowserRouter>

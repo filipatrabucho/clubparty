@@ -2144,3 +2144,71 @@ h1, h2, h3 {
     max-width: 1000px;
   }
 }
+/* ============================================
+   SUPPORT PAGE
+   ============================================ */
+.support-page {
+  padding: 4rem 4rem 6rem;
+  min-height: 70vh;
+}
+
+.support-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.support-page h1 {
+  font-size: 2.6rem;
+  margin-bottom: 1rem;
+}
+
+.support-intro {
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  font-size: 1rem;
+}
+
+.support-form {
+  background: var(--bg-darker);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 2.5rem;
+}
+
+.support-form .form-group {
+  margin-bottom: 1.2rem;
+}
+
+.support-form .form-group:last-of-type {
+  margin-bottom: 1.5rem;
+}
+
+.support-form .filter-input {
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  font-size: 0.95rem;
+}
+
+.support-form textarea.filter-input {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.support-form .button {
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .support-page {
+    padding: 2.5rem 1.5rem 4rem;
+  }
+  .support-page h1 {
+    font-size: 2rem;
+  }
+  .support-form {
+    padding: 1.5rem;
+  }
+}
