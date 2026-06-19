@@ -85,10 +85,13 @@ export default async (req) => {
     .select('*', { count: 'exact', head: true })
     .eq('is_member', true);
 
-  const { count: totalBans } = await supabase
-    .from('mod_logs')
-    .select('*', { count: 'exact', head: true })
-    .eq('action', 'ban');
+  // Buscar bans reais à Discord API (igual ao get-bans)
+  const discordBansRes = await fetch(
+    `https://discord.com/api/guilds/${process.env.DISCORD_GUILD_ID}/bans?limit=1000`,
+    { headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` } }
+  );
+  const discordBans = discordBansRes.ok ? await discordBansRes.json() : [];
+  const totalBans = discordBans.length;
 
   const { count: activeWarnings } = await supabase
     .from('warnings')
@@ -104,7 +107,7 @@ export default async (req) => {
     ],
     totals: {
       totalMembers: totalMembers || 0,
-      totalBans: totalBans || 0,
+      totalBans,
       activeWarnings: activeWarnings || 0,
       actionsLast30Days: (logs || []).length,
     },
