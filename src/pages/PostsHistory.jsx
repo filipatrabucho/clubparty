@@ -3,19 +3,21 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../lib/useAuth';
 
 const STATUS_LABELS = {
-  draft: { label: 'Rascunho', className: 'status-draft' },
+  draft:     { label: 'Rascunho',  className: 'status-draft' },
   published: { label: 'Publicado', className: 'status-published' },
-  failed: { label: 'Falhou', className: 'status-failed' },
+  failed:    { label: 'Falhou',    className: 'status-failed' },
 };
+
 export default function PostsHistory() {
   const GUILD_ID = import.meta.env.VITE_DISCORD_GUILD_ID;
   const [posts, setPosts] = useState([]);
   const [channels, setChannels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [togglingId, setTogglingId] = useState(null);
 
   const { user } = useAuth();
   const canManagePosts = ['mod', 'admin'].includes(user?.dashboard_role);
-  
+
   useEffect(() => {
     loadPosts();
     fetch('/.netlify/functions/get-channels')
@@ -33,18 +35,32 @@ export default function PostsHistory() {
 
   async function handleDelete(post) {
     if (!confirm(`Apagar a publicação "${post.title}"? Isto também remove a mensagem do Discord (se ainda existir).`)) return;
-
     const res = await fetch('/.netlify/functions/delete-post', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ post_id: post.id }),
     });
-
     if (res.ok) {
       setPosts(prev => prev.filter(p => p.id !== post.id));
     } else {
       alert('Erro ao apagar publicação');
     }
+  }
+
+  async function handleToggleHomepage(post) {
+    setTogglingId(post.id);
+    const next = !post.show_on_homepage;
+    const res = await fetch('/.netlify/functions/update-post', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ post_id: post.id, show_on_homepage: next }),
+    });
+    if (res.ok) {
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, show_on_homepage: next } : p));
+    } else {
+      alert('Erro ao atualizar publicação');
+    }
+    setTogglingId(null);
   }
 
   function channelName(id) {
@@ -59,6 +75,8 @@ export default function PostsHistory() {
       hour: '2-digit', minute: '2-digit',
     });
   }
+
+  const homepageCount = posts.filter(p => p.show_on_homepage).length;
 
   return (
     <div className="dashboard">
@@ -88,6 +106,10 @@ export default function PostsHistory() {
           <span className="stat-number">{posts.filter(p => p.status === 'failed').length}</span>
           <span className="stat-label">Falhadas</span>
         </div>
+        <div className="dashboard-stat-card">
+          <span className="stat-number">{homepageCount}</span>
+          <span className="stat-label">Na homepage</span>
+        </div>
       </div>
 
       <div className="table-wrapper">
@@ -103,6 +125,7 @@ export default function PostsHistory() {
                 <th>Título</th>
                 <th>Canal</th>
                 <th>Estado</th>
+                <th>Homepage</th>
                 <th>Publicado em</th>
                 <th>Ações</th>
               </tr>
@@ -119,7 +142,9 @@ export default function PostsHistory() {
                   </td>
                   <td>
                     <span className="member-username">{post.title}</span>
-                    <div className="post-excerpt">{post.content?.slice(0, 60)}{post.content?.length > 60 ? '…' : ''}</div>
+                    <div className="post-excerpt">
+                      {post.content?.slice(0, 60)}{post.content?.length > 60 ? '…' : ''}
+                    </div>
                   </td>
                   <td className="text-muted">{channelName(post.target_channel_id)}</td>
                   <td>
@@ -127,20 +152,35 @@ export default function PostsHistory() {
                       {STATUS_LABELS[post.status]?.label || post.status}
                     </span>
                   </td>
+                  <td>
+                    {canManagePosts ? (
+                      <button
+                        className={`homepage-toggle ${post.show_on_homepage ? 'homepage-toggle--on' : ''}`}
+                        onClick={() => handleToggleHomepage(post)}
+                        disabled={togglingId === post.id}
+                        title={post.show_on_homepage ? 'Remover da homepage' : 'Mostrar na homepage'}
+                      >
+                        {togglingId === post.id ? '…' : post.show_on_homepage ? '✦ Ativo' : '○ Inativo'}
+                      </button>
+                    ) : (
+                      <span className="text-muted">{post.show_on_homepage ? '✦ Ativo' : '—'}</span>
+                    )}
+                  </td>
                   <td className="text-muted">{formatDate(post.published_at || post.created_at)}</td>
                   <td>
                     <div className="actions-cell">
                       {post.discord_message_id && (
-                      <a  href={`https://discord.com/channels/${GUILD_ID}/${post.target_channel_id}/${post.discord_message_id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="button-sm"
-                    >
-                        🔗 Ver
-                    </a>
-                    )}
+                        <a
+                          href={`https://discord.com/channels/${GUILD_ID}/${post.target_channel_id}/${post.discord_message_id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="button-sm"
+                        >
+                          🔗 Ver
+                        </a>
+                      )}
                       {canManagePosts && (
-                        <button className="button-sm button-danger" onClick={() => handleDelete(post.id)}>
+                        <button className="button-sm button-danger" onClick={() => handleDelete(post)}>
                           🗑️ Apagar
                         </button>
                       )}

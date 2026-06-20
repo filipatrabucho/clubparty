@@ -1,6 +1,5 @@
 import logo from '../assets/logo.png';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import ShopProducts from '../components/ShopProducts';
 
@@ -24,8 +23,8 @@ const GAMES = [
 ];
 
 export default function Landing() {
-  const [stats, setStats] = useState({ online: '...', total: '...' });
-  const [recentPosts, setRecentPosts] = useState([]);
+  const [stats, setStats] = useState({ online: null, total: null });
+  const [partners, setPartners] = useState([]);
   const [events, setEvents] = useState([]);
 
   useEffect(() => {
@@ -35,10 +34,11 @@ export default function Landing() {
       .catch(() => {});
   }, []);
 
+  // Só busca posts com show_on_homepage = true — usados como parceiros/afiliados
   useEffect(() => {
-    fetch('/.netlify/functions/get-recent-posts')
+    fetch('/.netlify/functions/get-recent-posts?homepage=true')
       .then(res => res.json())
-      .then(data => setRecentPosts(data.posts || []))
+      .then(data => setPartners(data.posts || []))
       .catch(() => {});
   }, []);
 
@@ -49,70 +49,134 @@ export default function Landing() {
       .catch(() => {});
   }, []);
 
+  const upcomingEvents = events
+    .filter(e => new Date(e.event_date + 'T00:00:00') >= new Date(new Date().setHours(0,0,0,0)))
+    .slice(0, 3);
+
   return (
     <div className="landing">
-      {/* HERO */}
+
+      {/* ── HERO ── */}
       <section className="hero">
         <div className="hero-glow" />
         <img src={logo} alt="Club Party" className="hero-logo" />
         <h1>CLUB <span className="accent-text">PARTY</span></h1>
+
+        {/* Subtítulo sem <br> manuais — o CSS controla o line-height e max-width */}
         <p className="hero-subtitle">
-          A festa privada onde és membro o ano inteiro.<br />
-          Comunidade, eventos e boa vibe — todos os dias.
+          O servidor português onde as pessoas realmente aparecem. Eventos todas as semanas, jogos organizados, e uma comunidade que te conhece pelo nome — não és só mais um número.
         </p>
-        <div className="hero-actions">
-          <a href="https://discord.gg/QkhJmtQgk3" className="button">Entrar no Discord</a>
-          <a href="#sobre" className="button button-outline">Saber mais</a>
-        </div>
+
+        {/* Stats — prova social imediata */}
         <div className="hero-stats">
           <div className="stat">
-            <span className="stat-number">{stats.total}</span>
-            <span className="stat-label">Membros</span>
+            <span className="stat-number">
+              {stats.total !== null ? stats.total : '—'}
+            </span>
+            <span className="stat-label">membros</span>
           </div>
           <div className="stat-divider" />
           <div className="stat">
-            <span className="stat-number stat-online">{stats.online}</span>
-            <span className="stat-label">Online agora</span>
+            <span className="stat-number stat-online">
+              <span className="online-dot" aria-hidden="true" />
+              {stats.online !== null ? stats.online : '—'}
+            </span>
+            <span className="stat-label">online agora</span>
+          </div>
+          <div className="stat-divider" />
+          <div className="stat">
+            <span className="stat-number">2022</span>
+            <span className="stat-label">desde</span>
+          </div>
+        </div>
+
+        <div className="hero-actions">
+          <a
+            href="https://discord.gg/QkhJmtQgk3"
+            className="button"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Entrar grátis no Club Party →
+          </a>
+          <a href="#sobre" className="button button-outline">Saber mais</a>
+        </div>
+        <p className="hero-fine">
+          Comunidade aberta · Entrada gratuita · Sem subscrição obrigatória ·{' '}
+          <a href="/regras" className="hero-fine-link">Ver as regras</a>
+        </p>
+      </section>
+
+      {/* ── PARA QUEM É ISTO? ── */}
+      <section className="for-who" id="sobre">
+        <p className="section-eyebrow">para quem é?</p>
+        <h2>Se és deste tipo de pessoa, vais adorar</h2>
+        <div className="for-who-grid">
+          <div className="for-who-card">
+            <span className="for-who-icon">🎮</span>
+            <p>Jogas à noite mas já não tens com quem — os amigos saíram do jogo e tu não.</p>
+          </div>
+          <div className="for-who-card">
+            <span className="for-who-icon">📅</span>
+            <p>Queres eventos organizados, com hora marcada, e não só um chat onde ninguém responde.</p>
+          </div>
+          <div className="for-who-card">
+            <span className="for-who-icon">🇵🇹</span>
+            <p>Preferes jogar com pessoas que falam a tua língua e entendem as tuas referências.</p>
           </div>
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section className="features" id="sobre">
-        <h2>Porque entrar no Club Party?</h2>
-        <div className="features-grid">
+      {/* ── FEATURES — grid de 4 ── */}
+      <section className="features">
+        <p className="section-eyebrow">o que oferecemos</p>
+        <h2>Mais do que um servidor — uma comunidade</h2>
+        <div className="features-grid features-grid--4">
           <div className="feature-card">
-            <h3>🎉 Eventos semanais</h3>
-            <p>Festas temáticas, sorteios e atividades exclusivas para a comunidade.</p>
+            <span className="feature-icon">🎉</span>
+            <h3>Eventos semanais</h3>
+            <p>Sorteios, noites de jogos e festas temáticas organizadas pela staff todas as semanas — sempre com hora e regras claras.</p>
           </div>
           <div className="feature-card">
-            <h3>🤝 Comunidade ativa</h3>
-            <p>Centenas de membros sempre online, prontos para conversar e jogar.</p>
+            <span className="feature-icon">🤝</span>
+            <h3>Membros que ficam</h3>
+            <p>Não é um servidor de passagem. Temos membros desde 2022 e uma base ativa que cresce sem perder a qualidade.</p>
           </div>
           <div className="feature-card">
-            <h3>🛡️ Ambiente moderado</h3>
-            <p>Staff dedicado a manter o servidor seguro, respeitoso e divertido.</p>
+            <span className="feature-icon">🛡️</span>
+            <h3>Staff dedicada</h3>
+            <p>Equipa de moderação ativa que mantém o servidor respeitoso, divertido e livre de toxicidade — todos os dias.</p>
+          </div>
+          <div className="feature-card">
+            <span className="feature-icon">🏆</span>
+            <h3>Sistema de convites</h3>
+            <p>Convida amigos e sobe de Bronze a Esmeralda, desbloqueando canais e benefícios exclusivos no servidor.</p>
           </div>
         </div>
       </section>
-      <ShopProducts />
-      {/* EVENTOS */}
-      {events.length > 0 && (
+
+      {/* ── PRÓXIMOS EVENTOS ── */}
+      {upcomingEvents.length > 0 && (
         <section className="events">
-          <h2>Próximos Eventos</h2>
+          <p className="section-eyebrow">agenda</p>
+          <h2>O que aí vem</h2>
           <div className="events-grid">
-            {events.map(event => {
+            {upcomingEvents.map(event => {
               const date = new Date(event.event_date + 'T00:00:00');
               return (
                 <div key={event.id} className="event-card">
                   <div className="event-date">
                     <span className="event-day">{date.getDate().toString().padStart(2, '0')}</span>
-                    <span className="event-month">{date.toLocaleDateString('pt-PT', { month: 'short' })}</span>
+                    <span className="event-month">
+                      {date.toLocaleDateString('pt-PT', { month: 'short' })}
+                    </span>
                   </div>
                   <div className="event-info">
                     <h3>{event.emoji} {event.title}</h3>
                     {event.description && <p>{event.description}</p>}
-                    {event.event_time && <span className="event-time">⏰ {event.event_time}</span>}
+                    {event.event_time && (
+                      <span className="event-time">⏰ {event.event_time}</span>
+                    )}
                   </div>
                 </div>
               );
@@ -121,66 +185,105 @@ export default function Landing() {
         </section>
       )}
 
-      {/* SOBRE NÓS + JOGOS */}
-      <section className="about-games" id="sobre-nos">
-        <div className="about-games-grid">
-          <div className="about-text">
-            <h2>Sobre Nós</h2>
-            <p>
-              Club Party é um servidor de Discord criado no início de 2022, com o objetivo
-              de formar uma comunidade variada dentro do mundo dos jogos.
-            </p>
-            <p>
-              O principal objetivo é reunir o máximo de jogadores possível, para que
-              ninguém tenha de lidar com o problema de calhar com pessoas aleatórias
-              na hora de jogar uma partida competitiva.
-            </p>
-            <p>
-              Incentivamos todos os membros a conhecerem-se uns aos outros, para que
-              a experiência dentro do servidor seja a melhor possível.
-            </p>
-            <p>
-              Temos como objetivo dinamizar projetos como a criação de equipas
-              profissionais e, futuramente, torneios premiados.
-            </p>
-          </div>
-          <div className="games-grid">
-            {GAMES.map(game => (
-              <div key={game.name} className="game-tile" title={game.name}>
-                <img src={game.icon} alt={game.name} />
-              </div>
-            ))}
-          </div>
+      {/* ── O QUE SE JOGA AQUI ── */}
+      <section className="games-section" id="jogos">
+        <p className="section-eyebrow">jogos</p>
+        <h2>O que se joga aqui</h2>
+        <p className="section-subtitle">
+          Canais dedicados e eventos para mais de 16 jogos — e estamos sempre abertos a sugestões.
+        </p>
+        <div className="games-grid">
+          {GAMES.map(game => (
+            <div key={game.name} className="game-tile" title={game.name}>
+              <img src={game.icon} alt={game.name} />
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* ÚLTIMAS PUBLICAÇÕES */}
-      {recentPosts.length > 0 && (
-        <section className="recent-posts">
-          <h2>Últimas Novidades</h2>
-          <p className="gallery-subtitle">O que tem acontecido na nossa comunidade</p>
-          <div className="posts-grid">
-            {recentPosts.map(post => (
-              <div key={post.id} className="post-card">
-                <img src={post.image_url} alt={post.title} />
-                <div className="post-card-content">
+      {/* ── SOBRE NÓS ── */}
+      <section className="about-section" id="sobre-nos">
+        <p className="section-eyebrow">a nossa história</p>
+        <h2>Criados em 2022, cá continuamos</h2>
+        <div className="about-columns">
+          <p>
+            O Club Party nasceu com um objetivo simples: acabar com o problema de jogares com desconhecidos
+            aleatórios. Queríamos um sítio onde toda a gente se conhecesse pelo nome — e não só pelo username.
+          </p>
+          <p>
+            Hoje somos uma comunidade variada de jogadores portugueses, com eventos regulares, uma staff comprometida,
+            e planos para torneios premiados no futuro. Se entras hoje, és parte da história desde cedo.
+          </p>
+        </div>
+      </section>
+
+      {/* ── PARCEIROS & AFILIADOS ── só aparece se houver posts com show_on_homepage = true ── */}
+      {partners.length > 0 && (
+        <section className="partners-section">
+          <p className="section-eyebrow">parceiros</p>
+          <h2>Recomendados pela comunidade</h2>
+          <p className="section-subtitle">
+            Produtos e serviços que usamos e recomendamos — alguns links são de afiliados.
+          </p>
+          <div className="partners-grid">
+            {partners.map(post => (
+              <a
+                key={post.id}
+                href={post.link_url || '#'}
+                className="partner-card"
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+              >
+                {post.image_url && (
+                  <div
+                  className="partner-card-img"
+                  style={{ background: post.image_bg_color || '#ffffff' }}
+                >
+                    <img src={post.image_url} alt={post.title} />
+                  </div>
+                )}
+                <div className="partner-card-body">
                   <h3>{post.title}</h3>
-                  <p>{post.content?.slice(0, 90)}{post.content?.length > 90 ? '…' : ''}</p>
+                  <p>{post.content?.slice(0, 80)}{post.content?.length > 80 ? '…' : ''}</p>
+                  <span className="partner-cta">Ver oferta →</span>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </section>
       )}
 
-      {/* CTA FINAL */}
-      <section className="cta">
-        <h2>Pronto para entrar?</h2>
-        <p>Junta-te a nós agora mesmo. É grátis e demora 10 segundos.</p>
-        <a href="https://discord.gg/QkhJmtQgk3" className="button">Entrar no Discord</a>
+      {/* ── LOJA ── */}
+      <section className="shop-section">
+        <p className="section-eyebrow">merch</p>
+        <h2>Representa a comunidade</h2>
+        <p className="section-subtitle">
+          T-shirts, hoodies e mais — cada compra apoia diretamente o servidor.
+        </p>
+        <ShopProducts />
       </section>
 
-      {/* FOOTER */}
+      {/* ── CTA FINAL ── */}
+      <section className="cta">
+        <h2>Pronto para entrar?</h2>
+        <p>
+          É grátis, demora 10 segundos e já tens{' '}
+          {stats.total !== null ? `${stats.total} pessoas` : 'centenas de pessoas'} à tua espera.
+        </p>
+        <a
+          href="https://discord.gg/QkhJmtQgk3"
+          className="button"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Entrar no Club Party →
+        </a>
+        <p className="cta-fine">
+          Antes de entrar,{' '}
+          <a href="/regras" className="cta-fine-link">lê as regras em 2 minutos</a>.
+        </p>
+      </section>
+
       <Footer />
     </div>
   );
